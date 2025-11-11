@@ -37,7 +37,6 @@ class DataService extends ChangeNotifier {
       _csvItems = await _csvService.loadCsv();
       _rssItems = await _rssService.fetchRss();
       _themes = _csvItems.map((e) => e.theme).toSet().toList();
-      print(_themes);
       _parsedRssItems = parseRssData();
     } catch (e) {
       _error = e.toString();
