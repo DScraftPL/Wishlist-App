@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wishlist_app/models/wishlist.dart';
+import 'package:wishlist_app/screens/exp_screen.dart';
 import 'package:wishlist_app/screens/rss_screen.dart';
 import '../widgets/custom_button.dart';
 
@@ -35,7 +36,17 @@ class _HomeScreenState extends State<HomeScreen> {
                     );
                   },
                 ),
-                CustomButton(text: 'PRZYCISK 2', onPressed: () => {}),
+                CustomButton(
+                  text: 'PRZYCISK 2',
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ExpScreen(),
+                      ),
+                    );
+                  },
+                ),
               ],
             ),
             Expanded(
@@ -49,10 +60,11 @@ class _HomeScreenState extends State<HomeScreen> {
                           child: ListTile(
                             title: Text(item),
                             trailing: IconButton(
-                              onPressed: () => model.removeAt(index), 
-                              icon: const Icon(Icons.delete)),
-                            )
-                          );
+                              onPressed: () => model.removeAt(index),
+                              icon: const Icon(Icons.delete),
+                            ),
+                          ),
+                        );
                       },
                     ),
             ),

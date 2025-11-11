@@ -13,7 +13,6 @@ class RSSScreen extends StatefulWidget {
 String getRssUrl(String originalUrl) {
   if (kIsWeb) {
     return 'https://api.allorigins.win/raw?url=${Uri.encodeComponent(originalUrl)}';
-    // or: 'https://corsproxy.io/?${Uri.encodeComponent(originalUrl)}'
   }
   return originalUrl;
 }

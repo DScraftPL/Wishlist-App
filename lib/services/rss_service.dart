@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:xml/xml.dart' as xml;
 
@@ -28,7 +27,6 @@ class RssService {
         uri = uri.replace(scheme: 'https');
       }
     } catch (e) {
-      print('[RssService] Invalid URL: $url — $e');
       return [];
     }
     final res = await http.get(uri);
