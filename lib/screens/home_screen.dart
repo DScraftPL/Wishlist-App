@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:wishlist_app/models/wishlist.dart';
 import 'package:wishlist_app/screens/exp_screen.dart';
 import 'package:wishlist_app/screens/rss_screen.dart';
 import '../widgets/custom_button.dart';
@@ -15,8 +13,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
-    final model = context.watch<WishlistModel>();
-
     return Scaffold(
       appBar: AppBar(title: const Text('Home Screen')),
       body: Padding(
@@ -26,7 +22,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Row(
               children: [
                 CustomButton(
-                  text: 'PRZYCISK 1',
+                  text: 'Dane RSS z PromoKlocki.pl',
                   onPressed: () {
                     Navigator.push(
                       context,
@@ -37,7 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   },
                 ),
                 CustomButton(
-                  text: 'PRZYCISK 2',
+                  text: 'Lista odchodzących zestawów',
                   onPressed: () {
                     Navigator.push(
                       context,
@@ -48,25 +44,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   },
                 ),
               ],
-            ),
-            Expanded(
-              child: model.items.isEmpty
-                  ? const Center(child: Text('no items'))
-                  : ListView.builder(
-                      itemCount: model.items.length,
-                      itemBuilder: (context, index) {
-                        final item = model.items[index];
-                        return Card(
-                          child: ListTile(
-                            title: Text(item),
-                            trailing: IconButton(
-                              onPressed: () => model.removeAt(index),
-                              icon: const Icon(Icons.delete),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
             ),
           ],
         ),

@@ -1,13 +1,26 @@
 import 'package:flutter/material.dart';
 import 'screens/home_screen.dart';
 import 'package:provider/provider.dart';
-import 'models/wishlist.dart';
+import 'package:wishlist_app/services/data_service.dart';
 
-void main() => runApp(
-  ChangeNotifierProvider(
-    create: (_) => WishlistModel(),
-    child: const MyApp(),
-  ));
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // create DataService instance so we can start initialization in background
+  final dataService = DataService();
+
+  runApp(
+    MultiProvider(
+      providers: [ChangeNotifierProvider.value(value: dataService)],
+      child: const MyApp(),
+    ),
+  );
+
+  // initialize data after the first frame so app shows quickly
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    dataService.init();
+  });
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});

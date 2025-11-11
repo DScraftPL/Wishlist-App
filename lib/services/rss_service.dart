@@ -1,24 +1,19 @@
 import 'package:http/http.dart' as http;
+import 'package:wishlist_app/models/rss_item.dart';
 import 'package:xml/xml.dart' as xml;
-
-class RssItem {
-  final String title;
-  final String link;
-  final String description;
-  final String pubDate;
-
-  RssItem({
-    required this.title,
-    required this.link,
-    required this.description,
-    required this.pubDate,
-  });
-}
-
+import 'package:flutter/foundation.dart';
 
 class RssService {
+
+  String getRssUrl(String originalUrl) {
+    if (kIsWeb) {
+      return 'https://api.allorigins.win/raw?url=${Uri.encodeComponent(originalUrl)}';
+    }
+    return originalUrl;
+  }
   
-  Future<List<RssItem>> fetchRss(String url) async {
+  Future<List<RssItem>> fetchRss({String url = 'https://promoklocki.pl/okazje-lego/rss'}) async {
+    url = getRssUrl(url);
     Uri uri;
     try {
       uri = Uri.parse(url);

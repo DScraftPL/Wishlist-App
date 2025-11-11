@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher_string.dart';
-import '../services/rss_service.dart';
-import 'package:flutter/foundation.dart';
+import 'package:wishlist_app/services/data_service.dart';
+import 'package:wishlist_app/widgets/rss_item_card.dart';
 
 class RSSScreen extends StatefulWidget {
   const RSSScreen({super.key});
@@ -10,101 +11,75 @@ class RSSScreen extends StatefulWidget {
   State<StatefulWidget> createState() => _RSSScreenState();
 }
 
-String getRssUrl(String originalUrl) {
-  if (kIsWeb) {
-    return 'https://api.allorigins.win/raw?url=${Uri.encodeComponent(originalUrl)}';
-  }
-  return originalUrl;
-}
-
 class _RSSScreenState extends State<RSSScreen> {
-  late Future<List<RssItem>> _futureItems;
-  final String _feedUrl = getRssUrl('https://promoklocki.pl/okazje-lego/rss');
-
-  @override
-  void initState() {
-    super.initState();
-    _futureItems = RssService().fetchRss(_feedUrl);
-  }
-
-  Future<void> _refresh() async {
-    setState(() {
-      _futureItems = RssService().fetchRss(_feedUrl);
-    });
-    await _futureItems;
-  }
+  String? _selectedTheme;
 
   @override
   Widget build(BuildContext context) {
+    final ds = context.watch<DataService>();
+    final items = ds.parsedRssItems;
+    final themes = ds.themes;
+    final filteredItems = _selectedTheme == null
+        ? items
+        : items.where((e) => e.theme == _selectedTheme).toList();
+
     return Scaffold(
       appBar: AppBar(title: const Text('RSS Feed')),
-      body: FutureBuilder(
-        future: _futureItems,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text('Error: ${snapshot.error}'),
-                    const SizedBox(height: 12),
-                    ElevatedButton(
-                      onPressed: _refresh,
-                      child: const Text('Retry'),
+      body: ds.loading
+          ? const Center(child: CircularProgressIndicator())
+          : Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                children: [
+                  // horizontal theme selector (bounded height)
+                  SizedBox(
+                    height: 48,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: themes.length,
+                      itemBuilder: (context, index) {
+                        final theme = themes[index];
+                        final selected = theme == _selectedTheme;
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: ChoiceChip(
+                            label: Text(theme),
+                            selected: selected,
+                            onSelected: (on) {
+                              setState(() {
+                                _selectedTheme = on ? theme : null;
+                              });
+                            },
+                          ),
+                        );
+                      },
                     ),
-                  ],
-                ),
-              ),
-            );
-          }
-          final items = snapshot.data ?? <RssItem>[];
-          if (items.isEmpty) {
-            return RefreshIndicator(
-              onRefresh: _refresh,
-              child: ListView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                children: const [
-                  SizedBox(height: 200),
-                  Center(child: Text('Data is empty')),
+                  ),
+                  const SizedBox(height: 12),
+                  // content list
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: filteredItems.length,
+                      itemBuilder: (context, index) {
+                        final item = filteredItems[index];
+                        return RssItemCardWidget(
+                          data: item,
+                          onTap: () async {
+                            final url = item.link;
+                            if (await canLaunchUrlString(url)) {
+                              await launchUrlString(
+                                url,
+                                mode: LaunchMode.externalApplication,
+                              );
+                            }
+                          },
+                        );
+                      },
+                    ),
+                  ),
                 ],
               ),
-            );
-          }
-
-          return RefreshIndicator(
-            onRefresh: _refresh,
-            child: ListView.builder(
-              itemCount: items.length,
-              itemBuilder: (context, index) {
-                final item = items[index];
-                return ListTile(
-                  title: Text(item.title),
-                  subtitle: Text(item.description),
-                  trailing: const Icon(Icons.open_in_new),
-                  onTap: () async {
-                    final url = item.link;
-                    if (await canLaunchUrlString(url)) {
-                      await launchUrlString(
-                        url,
-                        mode: LaunchMode.externalApplication,
-                      );
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('cannot open')),
-                      );
-                    }
-                  },
-                );
-              },
             ),
-          );
-        },
-      ),
     );
   }
 }
