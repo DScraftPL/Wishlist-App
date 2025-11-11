@@ -4,7 +4,7 @@ import '../models/csv_item.dart';
 
 class CsvService {
   Future<List<CsvItem>> loadCsv({
-    csvFile = 'assets/csv/expiration_date.csv',
+    String csvFile = 'assets/csv/expiration_date.csv',
   }) async {
     final raw = await rootBundle.loadString(csvFile);
     final rows = const CsvToListConverter().convert(raw);
