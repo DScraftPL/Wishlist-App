@@ -66,11 +66,8 @@ class DataService extends ChangeNotifier {
     _error = null;
     try {
       _retirementItems = await _retirementService.loadCsv();
-      print("hello1");
       _allThemeItems = await _parseThemeItem();
-      print("hello2");
       _allSetItems = await _parseAllItem();
-      print("hello3");
       _setRetirementLoading(false);
       _rssItems = await _rssService.fetchRss();
       _setRssLoading(false);
