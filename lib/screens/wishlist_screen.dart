@@ -3,6 +3,7 @@ import 'package:wishlist_app/helpers/local_pager.dart';
 import 'package:wishlist_app/screens/add_wishlist.dart';
 import 'package:wishlist_app/services/wishlist_service.dart';
 import 'package:wishlist_app/widgets/paginanted_list.dart';
+import 'package:wishlist_app/widgets/wishlist.dart';
 
 class WishlistScreen extends StatefulWidget {
   const WishlistScreen({super.key});
@@ -28,7 +29,7 @@ class _WishlistState extends State<WishlistScreen> {
                   Expanded(
                     child: PaginantedList(
                       pager: pager,
-                      itemBuilder: (item) => Text(item.setName),
+                      itemBuilder: (item) => WishlistCard(item: item),
                     ),
                   ),
                 ],

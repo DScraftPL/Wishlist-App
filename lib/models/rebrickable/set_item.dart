@@ -4,6 +4,7 @@ class SetItem {
   String themeId;
   String pieceCount;
   String link;
+  String year;
 
   SetItem({
     required this.setName,
@@ -11,6 +12,7 @@ class SetItem {
     required this.themeId,
     required this.pieceCount,
     required this.link,
+    required this.year,
   });
 }
 
@@ -20,6 +22,7 @@ class ParsedSetItem {
   String themeName;
   String pieceCount;
   String link;
+  String year;
 
   ParsedSetItem({
     required this.setName,
@@ -27,5 +30,6 @@ class ParsedSetItem {
     required this.themeName,
     required this.pieceCount,
     required this.link,
+    required this.year,
   });
 }

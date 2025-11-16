@@ -14,30 +14,49 @@ class ParsedSetItemCard extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
+        child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              item.setName,
-              style: const TextStyle(
-                  fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 4),
-            Text("Set Number: ${item.setNumber}"),
-            Text("Theme: ${item.themeName}"),
-            Text("Pieces: ${item.pieceCount}"),
-            const SizedBox(height: 8),
-            GestureDetector(
-              onTap: () {
-                // Open link
-              },
-              child: Text(
-                item.link,
-                style: const TextStyle(
-                  color: Colors.blue,
-                  decoration: TextDecoration.underline,
-                ),
+            // Text section
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item.setName,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text("Set Number: ${item.setNumber}"),
+                  Text("Theme: ${item.themeName}"),
+                  Text("Pieces: ${item.pieceCount}"),
+                ],
               ),
+            ),
+            const SizedBox(width: 16),
+            // Image section
+            Image.network(
+              item.link,
+              width: 100,
+              height: 100,
+              fit: BoxFit.cover,
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) return child;
+                return Center(
+                  child: CircularProgressIndicator(
+                    value: loadingProgress.expectedTotalBytes != null
+                        ? loadingProgress.cumulativeBytesLoaded /
+                              (loadingProgress.expectedTotalBytes ?? 1)
+                        : null,
+                  ),
+                );
+              },
+              errorBuilder: (context, error, stackTrace) {
+                return const Icon(Icons.error, size: 50, color: Colors.red);
+              },
             ),
           ],
         ),

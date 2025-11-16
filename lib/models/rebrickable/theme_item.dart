@@ -9,3 +9,13 @@ class ThemeItem {
     this.parentId
   });
 }
+
+class ParsedThemeItem {
+  String id;
+  String fullName;
+
+  ParsedThemeItem({
+    required this.id,
+    required this.fullName
+  });
+}

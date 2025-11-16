@@ -14,7 +14,7 @@ class RebrickableService {
 
     final List<T> result = [];
 
-    for (var i = 0; i < rows.length; i++) {
+    for (var i = 1; i < rows.length; i++) {
       final row = rows[i];
       result.add(rowParser(row));
     }
@@ -34,6 +34,7 @@ class RebrickableService {
         setNumber: cell(0),
         themeId: cell(3),
         pieceCount: cell(4),
+        year: cell(2)
       );
     });
   }

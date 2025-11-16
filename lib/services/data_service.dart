@@ -3,6 +3,7 @@ import 'package:http/http.dart';
 import 'package:wishlist_app/models/csv_item.dart';
 import 'package:wishlist_app/models/parsed_rss_item.dart';
 import 'package:wishlist_app/models/rebrickable/set_item.dart';
+import 'package:wishlist_app/models/rebrickable/theme_item.dart';
 import 'package:wishlist_app/models/rss_item.dart';
 import 'package:wishlist_app/services/rebrickable/rebrickable_service.dart';
 import 'package:wishlist_app/services/retirement_service.dart';
@@ -15,14 +16,14 @@ class DataService extends ChangeNotifier {
   List<RetirementItem> _retirementItems = [];
   List<RssItem> _rssItems = [];
   List<ParsedRssItem> _parsedRssItems = [];
-  List<String> _allThemeItems = [];
+  List<ParsedThemeItem> _allThemeItems = [];
   List<ParsedSetItem> _allSetItems = [];
 
   List<RetirementItem> get retirementItems =>
       List.unmodifiable(_retirementItems);
   List<RssItem> get rssItems => List.unmodifiable(_rssItems);
   List<ParsedRssItem> get parsedRssItems => List.unmodifiable(_parsedRssItems);
-  List<String> get parsedThemeItem =>
+  List<ParsedThemeItem> get parsedThemeItem =>
       List.unmodifiable(_allThemeItems);
   List<ParsedSetItem> get allSetItems => List.unmodifiable(_allSetItems);
 
@@ -117,10 +118,15 @@ class DataService extends ChangeNotifier {
   }
 
   Future<List<ParsedSetItem>> _parseAllItem() async {
-    final data = await RebrickableService.parseSetCsv();
-    Map<String, String> idToTheme = _allThemeItems
-      .asMap()
-      .map((index, value) => MapEntry((index + 1).toString(), value));
+    final data = (await RebrickableService.parseSetCsv())
+      .where(
+        (e) => e.pieceCount != '0' &&  e.pieceCount != '1' 
+      )
+      .toList();
+  
+    Map<String, String> idToTheme = {
+      for(var obj in _allThemeItems) obj.id : obj.fullName
+    };
 
     return data.map((e) {
       return ParsedSetItem(
@@ -128,21 +134,22 @@ class DataService extends ChangeNotifier {
         setNumber: e.setNumber, 
         themeName: idToTheme[e.themeId] ?? 'Unknown', 
         pieceCount: e.pieceCount,
-        link: e.link
+        link: e.link,
+        year: e.year
       );
     }).toList();
   }
 
-  Future<List<String>> _parseThemeItem() async {
+  Future<List<ParsedThemeItem>> _parseThemeItem() async {
     final data = await RebrickableService.parseThemeCsv();
     Map<String, String> idToName = {for (var obj in data) obj.id: obj.name};
 
-    List<String> result = data.map((e) {
+    List<ParsedThemeItem> result = data.map((e) {
       String result = e.name;
       if (e.parentId != null) {
         e.name += idToName[e.parentId] ?? 'Unknown';
       }
-      return result;
+      return ParsedThemeItem(id: e.id, fullName: result);
     }).toList();
 
     return result;

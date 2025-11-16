@@ -21,7 +21,8 @@ class _AllState extends State<AllScreen> {
     final items = ds.allSetItems;
     final themes = ds.parsedThemeItem;
     final filteredItems = _selectedTheme == null
-        ? items
+        //TODO: Change this! Create a filter!
+        ? items.where((e) => e.year == '2025').toList()
         : items.where((e) => e.themeName == _selectedTheme).toList();
     final pager = LocalPager(filteredItems);
 
@@ -39,15 +40,15 @@ class _AllState extends State<AllScreen> {
                       scrollDirection: Axis.horizontal,
                       itemCount: themes.length,
                       itemBuilder: (context, index) {
-                        final selected = themes[index] == _selectedTheme;
+                        final selected = themes[index].fullName == _selectedTheme;
                         return Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
                           child: ChoiceChip(
-                            label: Text(themes[index]),
+                            label: Text(themes[index].fullName),
                             selected: selected,
                             onSelected: (on) {
                               setState(() {
-                                _selectedTheme = on ? themes[index] : null;
+                                _selectedTheme = on ? themes[index].fullName : null;
                               });
                             },
                           ),
