@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wishlist_app/screens/exp_screen.dart';
 import 'package:wishlist_app/screens/rss_screen.dart';
+import 'package:wishlist_app/screens/wishlist_screen.dart';
 import 'package:wishlist_app/services/data_service.dart';
 import 'package:wishlist_app/widgets/data_health.dart';
 import '../widgets/custom_button.dart';
@@ -48,6 +49,17 @@ class _HomeScreenState extends State<HomeScreen> {
                     );
                   },
                 ),
+                                CustomButton(
+                  text: 'Lista życzeń',
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const WishlistScreen(),
+                      ),
+                    );
+                  },
+                ),
               ],
             ),
             LoadingStatusWidget(
@@ -61,7 +73,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(onPressed: () => {}),
     );
   }
 }

@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:wishlist_app/models/wishlist.dart';
 import 'screens/home_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:wishlist_app/services/data_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // create DataService instance so we can start initialization in background
   final dataService = DataService();
+
+  await Hive.initFlutter();
+
+  Hive.registerAdapter(WishlistItemAdapter());
+
+  await Hive.openBox<WishlistItem>('wishlistBox');
 
   runApp(
     MultiProvider(
@@ -16,7 +22,6 @@ Future<void> main() async {
     ),
   );
 
-  // initialize data after the first frame so app shows quickly
   WidgetsBinding.instance.addPostFrameCallback((_) {
     dataService.init();
   });
