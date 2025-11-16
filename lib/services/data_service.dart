@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:http/http.dart';
 import 'package:wishlist_app/models/csv_item.dart';
 import 'package:wishlist_app/models/parsed_rss_item.dart';
 import 'package:wishlist_app/models/rss_item.dart';
@@ -20,9 +21,15 @@ class DataService extends ChangeNotifier {
   List<String> get themes => List.unmodifiable(_themes);
 
   bool _loading = false;
+  bool _csvLoading = false;
+  bool _rssLoading = false;
+  bool _parseRssLoading = false;
   String? _error;
 
   bool get loading => _loading;
+  bool get csvLoading => _csvLoading;
+  bool get rssLoading => _rssLoading;
+  bool get parseCsvLoading => _parseRssLoading;
   String? get error => _error;
 
   void _setLoading(bool v) {
@@ -30,14 +37,37 @@ class DataService extends ChangeNotifier {
     notifyListeners();
   }
 
+  void _setCsvLoading(bool v) {
+    _csvLoading = v;
+    notifyListeners();
+  }
+
+  void _setRssLoading(bool v) {
+    _rssLoading = v;
+    notifyListeners();
+  }
+
+  void _setParseRssLoading(bool v) {
+    _parseRssLoading = v;
+    notifyListeners();
+  }
+
   Future<void> init() async {
     _setLoading(true);
+    _setCsvLoading(true);
+    _setRssLoading(true);
+    _setParseRssLoading(true);
     _error = null;
     try {
       _csvItems = await _csvService.loadCsv();
-      _rssItems = await _rssService.fetchRss();
       _themes = _csvItems.map((e) => e.theme).toSet().toList();
+      _setCsvLoading(false);
+      _rssItems = await _rssService.fetchRss();
+      _setRssLoading(false);
       _parsedRssItems = parseRssData();
+      _setParseRssLoading(false);
+    } on ClientException {
+      _error = "Network Error: Please enable internet!";
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -57,33 +87,25 @@ class DataService extends ChangeNotifier {
   }
 
   List<ParsedRssItem> parseRssData() {
-    final List<ParsedRssItem> result = [];
-
     final Map<String, CsvItem> setNumberToCsv = {
       for (var obj in _csvItems) obj.setNumber: obj,
     };
 
-    for (final rss in _rssItems) {
-      List<String> titleParsed = rss.title.split(' ');
-      List<String> titleOfTitle = rss.title.split(' - ');
-      String parsedSetNumber = titleParsed[1];
-      String parsedSetTheme = titleParsed[2];
+    return _rssItems.map((e) {
+      final titleParsed = e.title.split(' ');
+      final parsedSetNumber = titleParsed[1];
+      // String parsedSetTheme = titleParsed[2];
+      final itemFromMap = setNumberToCsv[parsedSetNumber];
 
-      CsvItem? itemFromMap = setNumberToCsv[parsedSetNumber];
-
-      result.add(
-        ParsedRssItem(
-          discountPrice: titleParsed.last,
-          link: rss.link,
-          pieceCount: itemFromMap?.pieceCount ?? 'Unknown',
-          retirementDate: itemFromMap?.retirementDate ?? 'Retired',
-          setName: itemFromMap?.setName ?? titleOfTitle[1],
-          setNumber: parsedSetNumber,
-          theme: itemFromMap?.theme ?? parsedSetTheme,
-        ),
+      return ParsedRssItem(
+        discountPrice: titleParsed.last,
+        link: e.link,
+        pieceCount: itemFromMap?.pieceCount ?? 'Unknown',
+        retirementDate: itemFromMap?.retirementDate ?? 'Retired',
+        setName: itemFromMap?.setName ?? e.title.split(' - ')[1],
+        setNumber: parsedSetNumber,
+        theme: itemFromMap?.theme ?? titleParsed[2],
       );
-    }
-
-    return result;
+    }).toList();
   }
 }

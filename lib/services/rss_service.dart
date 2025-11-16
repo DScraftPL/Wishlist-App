@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:http/http.dart' as http;
 import 'package:wishlist_app/models/rss_item.dart';
 import 'package:xml/xml.dart' as xml;
@@ -24,7 +26,12 @@ class RssService {
     } catch (e) {
       return [];
     }
-    final res = await http.get(uri);
+    final res = await http.get(uri).timeout(
+      const Duration(seconds: 30),
+      onTimeout: () {
+        throw TimeoutException('RSS fetch timeout');
+      }
+    );
     if (res.statusCode != 200) {
       throw Exception('Failed to load RSS');
     }

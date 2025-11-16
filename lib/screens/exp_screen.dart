@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:wishlist_app/helpers/local_pager.dart';
 import 'package:wishlist_app/services/data_service.dart';
 import 'package:wishlist_app/widgets/csv_item_card.dart';
+import 'package:wishlist_app/widgets/paginanted_list.dart';
 
 class ExpScreen extends StatefulWidget {
   const ExpScreen({super.key});
@@ -21,6 +23,7 @@ class _ExpState extends State<ExpScreen> {
     final filteredItems = _selectedTheme == null
         ? items
         : items.where((e) => e.theme == _selectedTheme).toList();
+    final pager = LocalPager(filteredItems);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Expiration List')),
@@ -56,12 +59,9 @@ class _ExpState extends State<ExpScreen> {
                   const SizedBox(height: 12),
                   // main vertical list must be constrained: use Expanded
                   Expanded(
-                    child: ListView.builder(
-                      itemCount: filteredItems.length,
-                      itemBuilder: (context, index) {
-                        final item = filteredItems[index];
-                        return CsvItemCardWidget(data: item);
-                      },
+                    child: PaginantedList(
+                      pager: pager,
+                      itemBuilder: (item) => CsvItemCardWidget(data: item),
                     ),
                   ),
                 ],
