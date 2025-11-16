@@ -1,11 +1,11 @@
-class CsvItem {
+class RetirementItem {
   String theme;
   String setName;
   String setNumber;
   String pieceCount;
   String retirementDate;
 
-  CsvItem({
+  RetirementItem({
     required this.theme,
     required this.setName,
     required this.setNumber,

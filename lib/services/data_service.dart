@@ -2,34 +2,40 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart';
 import 'package:wishlist_app/models/csv_item.dart';
 import 'package:wishlist_app/models/parsed_rss_item.dart';
+import 'package:wishlist_app/models/rebrickable/set_item.dart';
 import 'package:wishlist_app/models/rss_item.dart';
-import 'package:wishlist_app/services/csv_service.dart';
+import 'package:wishlist_app/services/rebrickable/rebrickable_service.dart';
+import 'package:wishlist_app/services/retirement_service.dart';
 import 'package:wishlist_app/services/rss_service.dart';
 
 class DataService extends ChangeNotifier {
   final RssService _rssService = RssService();
-  final CsvService _csvService = CsvService();
+  final RetirementService _retirementService = RetirementService();
 
-  List<CsvItem> _csvItems = [];
+  List<RetirementItem> _retirementItems = [];
   List<RssItem> _rssItems = [];
   List<ParsedRssItem> _parsedRssItems = [];
-  List<String> _themes = [];
+  List<String> _allThemeItems = [];
+  List<ParsedSetItem> _allSetItems = [];
 
-  List<CsvItem> get csvItems => List.unmodifiable(_csvItems);
+  List<RetirementItem> get retirementItems =>
+      List.unmodifiable(_retirementItems);
   List<RssItem> get rssItems => List.unmodifiable(_rssItems);
   List<ParsedRssItem> get parsedRssItems => List.unmodifiable(_parsedRssItems);
-  List<String> get themes => List.unmodifiable(_themes);
+  List<String> get parsedThemeItem =>
+      List.unmodifiable(_allThemeItems);
+  List<ParsedSetItem> get allSetItems => List.unmodifiable(_allSetItems);
 
   bool _loading = false;
-  bool _csvLoading = false;
+  bool _retirementLoading = false;
   bool _rssLoading = false;
   bool _parseRssLoading = false;
   String? _error;
 
   bool get loading => _loading;
-  bool get csvLoading => _csvLoading;
+  bool get retirementLoading => _retirementLoading;
   bool get rssLoading => _rssLoading;
-  bool get parseCsvLoading => _parseRssLoading;
+  bool get parseRssLoading => _parseRssLoading;
   String? get error => _error;
 
   void _setLoading(bool v) {
@@ -37,8 +43,8 @@ class DataService extends ChangeNotifier {
     notifyListeners();
   }
 
-  void _setCsvLoading(bool v) {
-    _csvLoading = v;
+  void _setRetirementLoading(bool v) {
+    _retirementLoading = v;
     notifyListeners();
   }
 
@@ -54,17 +60,21 @@ class DataService extends ChangeNotifier {
 
   Future<void> init() async {
     _setLoading(true);
-    _setCsvLoading(true);
+    _setRetirementLoading(true);
     _setRssLoading(true);
     _setParseRssLoading(true);
     _error = null;
     try {
-      _csvItems = await _csvService.loadCsv();
-      _themes = _csvItems.map((e) => e.theme).toSet().toList();
-      _setCsvLoading(false);
+      _retirementItems = await _retirementService.loadCsv();
+      print("hello1");
+      _allThemeItems = await _parseThemeItem();
+      print("hello2");
+      _allSetItems = await _parseAllItem();
+      print("hello3");
+      _setRetirementLoading(false);
       _rssItems = await _rssService.fetchRss();
       _setRssLoading(false);
-      _parsedRssItems = parseRssData();
+      _parsedRssItems = _parseRssData();
       _setParseRssLoading(false);
     } on ClientException {
       _error = "Network Error: Please enable internet!";
@@ -86,9 +96,9 @@ class DataService extends ChangeNotifier {
     }
   }
 
-  List<ParsedRssItem> parseRssData() {
-    final Map<String, CsvItem> setNumberToCsv = {
-      for (var obj in _csvItems) obj.setNumber: obj,
+  List<ParsedRssItem> _parseRssData() {
+    final Map<String, RetirementItem> setNumberToCsv = {
+      for (var obj in _retirementItems) obj.setNumber: obj,
     };
 
     return _rssItems.map((e) {
@@ -107,5 +117,37 @@ class DataService extends ChangeNotifier {
         theme: itemFromMap?.theme ?? titleParsed[2],
       );
     }).toList();
+  }
+
+  Future<List<ParsedSetItem>> _parseAllItem() async {
+    final data = await RebrickableService.parseSetCsv();
+    Map<String, String> idToTheme = _allThemeItems
+      .asMap()
+      .map((index, value) => MapEntry((index + 1).toString(), value));
+
+    return data.map((e) {
+      return ParsedSetItem(
+        setName: e.setName, 
+        setNumber: e.setNumber, 
+        themeName: idToTheme[e.themeId] ?? 'Unknown', 
+        pieceCount: e.pieceCount,
+        link: e.link
+      );
+    }).toList();
+  }
+
+  Future<List<String>> _parseThemeItem() async {
+    final data = await RebrickableService.parseThemeCsv();
+    Map<String, String> idToName = {for (var obj in data) obj.id: obj.name};
+
+    List<String> result = data.map((e) {
+      String result = e.name;
+      if (e.parentId != null) {
+        e.name += idToName[e.parentId] ?? 'Unknown';
+      }
+      return result;
+    }).toList();
+
+    return result;
   }
 }

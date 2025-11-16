@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:wishlist_app/screens/all_screen.dart';
 import 'package:wishlist_app/screens/exp_screen.dart';
 import 'package:wishlist_app/screens/rss_screen.dart';
 import 'package:wishlist_app/screens/wishlist_screen.dart';
@@ -49,7 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     );
                   },
                 ),
-                                CustomButton(
+                CustomButton(
                   text: 'Lista życzeń',
                   onPressed: () {
                     Navigator.push(
@@ -60,12 +61,23 @@ class _HomeScreenState extends State<HomeScreen> {
                     );
                   },
                 ),
+                CustomButton(
+                  text: 'Wszystkie przedmioty',
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const AllScreen(),
+                      ),
+                    );
+                  },
+                ),
               ],
             ),
             LoadingStatusWidget(
-              isCsvLoading: ds.csvLoading,
+              isCsvLoading: ds.retirementLoading,
               isRssLoading: ds.rssLoading,
-              isParseRssLoading: ds.parseCsvLoading,
+              isParseRssLoading: ds.parseRssLoading,
               isLoading: ds.loading,
               error: ds.error,
               onRestart: ds.init,

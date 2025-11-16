@@ -2,14 +2,14 @@ import 'package:csv/csv.dart';
 import 'package:flutter/services.dart';
 import '../models/csv_item.dart';
 
-class CsvService {
-  Future<List<CsvItem>> loadCsv({
+class RetirementService {
+  Future<List<RetirementItem>> loadCsv({
     String csvFile = 'assets/csv/expiration_date.csv',
   }) async {
     final raw = await rootBundle.loadString(csvFile);
     final rows = const CsvToListConverter().convert(raw);
 
-    final List<CsvItem> result = [];
+    final List<RetirementItem> result = [];
 
     for (var i = 0; i < rows.length; i++) {
       final row = rows[i];
@@ -22,7 +22,7 @@ class CsvService {
       }
 
       result.add(
-        CsvItem(
+        RetirementItem(
           theme: cell(0),
           setName: cell(3),
           setNumber: cell(2),

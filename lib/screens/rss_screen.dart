@@ -20,7 +20,7 @@ class _RSSScreenState extends State<RSSScreen> {
   Widget build(BuildContext context) {
     final ds = context.watch<DataService>();
     final items = ds.parsedRssItems;
-    final themes = ds.themes;
+    final themes = items.map((e) => e.theme).toSet().toList();
     final filteredItems = _selectedTheme == null
         ? items
         : items.where((e) => e.theme == _selectedTheme).toList();

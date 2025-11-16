@@ -2,38 +2,37 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wishlist_app/helpers/local_pager.dart';
 import 'package:wishlist_app/services/data_service.dart';
-import 'package:wishlist_app/widgets/retirement_item_card.dart';
+import 'package:wishlist_app/widgets/all_sets.dart';
 import 'package:wishlist_app/widgets/paginanted_list.dart';
 
-class ExpScreen extends StatefulWidget {
-  const ExpScreen({super.key});
+class AllScreen extends StatefulWidget {
+  const AllScreen({super.key});
 
   @override
-  State<StatefulWidget> createState() => _ExpState();
+  State<StatefulWidget> createState() => _AllState();
 }
 
-class _ExpState extends State<ExpScreen> {
+class _AllState extends State<AllScreen> {
   String? _selectedTheme;
 
   @override
   Widget build(BuildContext context) {
     final ds = context.watch<DataService>();
-    final items = ds.retirementItems;
-    final themes = items.map((e) => e.theme).toSet().toList(); 
+    final items = ds.allSetItems;
+    final themes = ds.parsedThemeItem;
     final filteredItems = _selectedTheme == null
         ? items
-        : items.where((e) => e.theme == _selectedTheme).toList();
+        : items.where((e) => e.themeName == _selectedTheme).toList();
     final pager = LocalPager(filteredItems);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Expiration List')),
+      appBar: AppBar(title: const Text('All items')),
       body: Padding(
         padding: const EdgeInsets.all(12.0),
         child: ds.loading
             ? const Center(child: CircularProgressIndicator())
             : Column(
                 children: [
-                  // horizontal list needs a bounded height
                   SizedBox(
                     height: 48,
                     child: ListView.builder(
@@ -61,8 +60,7 @@ class _ExpState extends State<ExpScreen> {
                   Expanded(
                     child: PaginantedList(
                       pager: pager,
-                      itemBuilder: (item) =>
-                          RetirementItemCardWidget(data: item),
+                      itemBuilder: (item) => ParsedSetItemCard(item: item),
                     ),
                   ),
                 ],

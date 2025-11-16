@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import '../models/csv_item.dart';
 
-class CsvItemCardWidget extends StatelessWidget {
-  final CsvItem data;
+class RetirementItemCardWidget extends StatelessWidget {
+  final RetirementItem data;
   final VoidCallback? onTap;
 
-  const CsvItemCardWidget({
+  const RetirementItemCardWidget({
     super.key,
     required this.data,
     this.onTap,
